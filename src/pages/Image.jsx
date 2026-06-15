@@ -1,7 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import useConfigStore from "../store/configStore";
 import { getClient } from "../api/apiClient";
+
+function useDebouncedValue(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 function Image() {
   const params = useParams();
@@ -22,19 +36,31 @@ function Image() {
   const [h, setH] = useState("");
   const [q, setQ] = useState("80");
   const [fmt, setFmt] = useState("");
+  const debouncedW = useDebouncedValue(w, 300);
+  const debouncedH = useDebouncedValue(h, 300);
+  const debouncedQ = useDebouncedValue(q, 300);
+  const debouncedFmt = useDebouncedValue(fmt, 150);
+  const transformPending =
+    w !== debouncedW || h !== debouncedH || q !== debouncedQ || fmt !== debouncedFmt;
 
   const previewUrl = useMemo(() => {
     if (!baseUrl || !key) return "";
 
     const url = new URL(`/image/${encodeURIComponent(key)}`, baseUrl);
 
-    if (w !== "") url.searchParams.set("w", w);
-    if (h !== "") url.searchParams.set("h", h);
-    if (q !== "") url.searchParams.set("q", q);
-    if (fmt) url.searchParams.set("fmt", fmt);
+    if (debouncedW !== "") url.searchParams.set("w", debouncedW);
+    if (debouncedH !== "") url.searchParams.set("h", debouncedH);
+    if (debouncedQ !== "") url.searchParams.set("q", debouncedQ);
+    if (debouncedFmt) url.searchParams.set("fmt", debouncedFmt);
 
     return url.toString();
-  }, [baseUrl, key, w, h, q, fmt]);
+  }, [baseUrl, key, debouncedW, debouncedH, debouncedQ, debouncedFmt]);
+
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  useEffect(() => {
+    if (previewUrl) setPreviewLoading(true);
+  }, [previewUrl]);
 
   // Metadata state
   const [metadata, setMetadata] = useState(null);
@@ -113,13 +139,26 @@ function Image() {
       {/* Preview */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-slate-200">Large preview</h2>
-        <div className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950">
+        <div className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-950">
           {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt={key}
-              className="max-h-[520px] w-full object-contain"
-            />
+            <>
+              <img
+                src={previewUrl}
+                alt={key}
+                loading="eager"
+                fetchPriority="high"
+                onLoad={() => setPreviewLoading(false)}
+                onError={() => setPreviewLoading(false)}
+                className={`max-h-[520px] w-full object-contain transition-opacity duration-150 ${
+                  previewLoading || transformPending ? "opacity-70" : "opacity-100"
+                }`}
+              />
+              {(previewLoading || transformPending) && (
+                <div className="absolute right-3 top-3 rounded border border-slate-700 bg-slate-950/90 px-2 py-1 text-xs text-slate-300">
+                  Updating preview
+                </div>
+              )}
+            </>
           ) : (
             <div className="px-4 py-10 text-center text-sm text-slate-500">
               {!key ? "No image selected" : "No preview URL"}
