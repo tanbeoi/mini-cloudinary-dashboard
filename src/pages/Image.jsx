@@ -36,10 +36,10 @@ function Image() {
   const [h, setH] = useState("");
   const [q, setQ] = useState("80");
   const [fmt, setFmt] = useState("");
-  const debouncedW = useDebouncedValue(w, 300);
-  const debouncedH = useDebouncedValue(h, 300);
-  const debouncedQ = useDebouncedValue(q, 300);
-  const debouncedFmt = useDebouncedValue(fmt, 150);
+  const debouncedW = useDebouncedValue(w, 180);
+  const debouncedH = useDebouncedValue(h, 180);
+  const debouncedQ = useDebouncedValue(q, 80);
+  const debouncedFmt = fmt;
   const transformPending =
     w !== debouncedW || h !== debouncedH || q !== debouncedQ || fmt !== debouncedFmt;
 
@@ -146,6 +146,7 @@ function Image() {
                 src={previewUrl}
                 alt={key}
                 loading="eager"
+                decoding="async"
                 fetchPriority="high"
                 onLoad={() => setPreviewLoading(false)}
                 onError={() => setPreviewLoading(false)}
