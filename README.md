@@ -8,9 +8,9 @@ This repository contains the **frontend** (React + Vite) for uploading images, b
 
 ## 🎥 Video Demo
 
-[![Mini Cloudinary Dashboard demo video](https://img.youtube.com/vi/UXzqjrTFrKI/0.jpg)](https://youtu.be/UXzqjrTFrKI)
+[![Mini Cloudinary Dashboard demo video](https://img.youtube.com/vi/QMmJw88IjaY/0.jpg)](https://youtu.be/QMmJw88IjaY)
 
-In this demo, I walk through the full frontend dashboard (upload, gallery, image details, transformations, metadata, signed URLs) and show the S3 bucket updating in real time.
+In this demo, I provide an end-to-end walkthrough of the Mini Cloudinary Dashboard, including gallery synchronization with AWS S3, authenticated image uploads, dynamic image transformations, metadata retrieval, and signed URL generation. The video demonstrates the complete data flow between the React frontend, Express backend, and AWS S3 cloud storage.
 
 ## 🔗 Backend Links
 
